@@ -5,33 +5,10 @@ import zigbee
 import json
 import string
 import mqtt
+
 var sensor = {}
-for device: zigbee
-  var info = device.info()
-  var ins = {}
-  for i: 0..info.size()-1
-    if info[i].key == 'Temperature'  
-      ins.insert('Temperature',info[i].val)
-    end
-    if info[i].key == 'Humidity'
-      ins.insert('Humidity',info[i].val)
-    end
-    if info[i].key == 'RMSVoltage'
-      ins.insert('Voltage',info[i].val)
-      ins.insert('Current',0)
-    end
-    if info[i].key == 'ActivePower'
-      ins.insert('Power',info[i].val)
-      ins.insert('Total',0)
-    end
-  end
-  if ins.size() > 0
-     sensor.insert(device.name,ins)
-  end
-end
 
 # Key-Mapping: Z2T Attributname -> HA-kompatibler Name
-# Konflikt: ActivePower gewinnt über Power (Schaltzustand)
 var KEY_MAP = {
   'Temperature':  'Temperature',
   'Humidity':     'Humidity',
@@ -73,6 +50,30 @@ class zb_hass_handler
       f'tele/tasmota_{MAC[6..]}/SENSOR',
       json.dump(payload)
     )
+  end
+end
+
+for device: zigbee
+  var info = device.info()
+  var ins = {}
+  for i: 0..info.size()-1
+    if info[i].key == 'Temperature'  
+      ins.insert('Temperature',info[i].val)
+    end
+    if info[i].key == 'Humidity'
+      ins.insert('Humidity',info[i].val)
+    end
+    if info[i].key == 'RMSVoltage'
+      ins.insert('Voltage',info[i].val)
+      ins.insert('Current',0)
+    end
+    if info[i].key == 'ActivePower'
+      ins.insert('Power',info[i].val)
+      ins.insert('Total',0)
+    end
+  end
+  if ins.size() > 0
+     sensor.insert(device.name,ins)
   end
 end
 
